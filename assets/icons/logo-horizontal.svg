@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" role="img" aria-label="Kanya Mahima">
+  <rect width="520" height="120" fill="none"/>
+  <g transform="translate(18 11) scale(.54)">
+    <path fill="#7A0F2E" d="M100 180C68 158 48 125 46 83c22 10 41 35 54 72 13-37 32-62 54-72-2 42-22 75-54 97z"/>
+    <path fill="#E87BA0" d="M100 180C79 158 69 131 76 97c13 13 21 34 24 57 3-23 11-44 24-57 7 34-3 61-24 83z"/>
+    <path fill="#F2B134" d="M100 152C87 124 91 88 113 44c22 54 18 90-13 108z"/>
+    <path fill="#fff" d="M116 64c-10 25-8 48 8 68-20-4-29-17-28-39 0-12 7-22 20-29z"/>
+    <path fill="none" stroke="#D58A1C" stroke-width="4.5" stroke-linecap="round" d="M23 172c25 13 51 14 77 0 26 14 52 13 77 0"/>
+  </g>
+  <text x="132" y="69" font-family="Georgia, 'Times New Roman', serif" font-size="39" font-weight="700" fill="#7A0F2E">Kanya Mahima</text>
+</svg>

@@ -1,0 +1,44 @@
+Kanya Mahima Contact Form Setup with Google Apps Script
+
+1. Create a Google Sheet.
+   - Name it something like: Kanya Mahima Contact Messages.
+
+2. In the Google Sheet, open Extensions > Apps Script.
+
+3. Delete any starter code in Code.gs.
+
+4. Copy the contents of the included Code.gs file into Apps Script.
+
+5. Update this line in Code.gs:
+   const RECIPIENT_EMAIL = 'connect@kanyamahima.org';
+   Replace it with the email address where you want to receive messages.
+
+6. Click Save.
+
+7. Deploy as a web app:
+   - Click Deploy > New deployment.
+   - Select type: Web app.
+   - Description: Kanya Mahima Contact Form.
+   - Execute as: Me.
+   - Who has access: Anyone.
+   - Click Deploy.
+   - Approve the required permissions.
+   - Copy the Web App URL. It usually ends with /exec.
+
+8. Open index.html.
+
+9. Find this line:
+   const GOOGLE_SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+10. Replace the placeholder with your Web App URL.
+
+11. Upload the updated index.html, styles.css, assets folder, and favicon files to GitHub.
+
+12. Test the form from the live website.
+    - Submit a test message.
+    - Check your Google Sheet.
+    - Check the recipient email inbox/spam folder.
+
+Important:
+- If you change Code.gs later, go to Deploy > Manage deployments > Edit > New version > Deploy.
+- The form uses fetch with no-cors to avoid browser CORS/preflight issues on static hosting.
