@@ -371,55 +371,60 @@
       </div>
     </section>
 
-    <section class="contact-section" id="contact">
-      <div class="container contact-grid">
-        <div class="contact-card card-panel">
-          <p class="section-kicker">Contact Us</p>
-          <h2>Connect with Kanya Mahima</h2>
-          <p>
-            Send us a message to learn more, volunteer, partner, or support the program.
-            Your message will be sent through our contact backend.
-          </p>
-        </div>
+<section class="contact-section" id="contact">
+  <div class="container contact-grid">
+    <div class="contact-card card-panel">
+      <p class="section-kicker">Contact Us</p>
+      <h2>Connect with Kanya Mahima</h2>
+      <p>
+        Send us a message to learn more, volunteer, partner, or support the program.
+        Your message will be sent through our contact backend.
+      </p>
+    </div>
 
-        <form class="contact-form card-panel" id="contactForm" novalidate>
-          <input type="hidden" name="source" value="Kanya Mahima Website" />
+    <form
+      class="contact-form card-panel"
+      id="contactForm"
+      action="javascript:void(0);"
+      onsubmit="event.preventDefault(); if (window.handleKanyaContactSubmit) { window.handleKanyaContactSubmit(event); } else { document.getElementById('formStatus').textContent = 'Form script did not load. Please refresh and try again.'; document.getElementById('formStatus').className = 'form-status error'; } return false;"
+    >
+      <input type="hidden" name="source" value="Kanya Mahima Website" />
 
-          <input
-            type="text"
-            name="website"
-            class="hp-field"
-            tabindex="-1"
-            autocomplete="off"
-            aria-hidden="true"
-          />
+      <input
+        type="text"
+        name="website"
+        class="hp-field"
+        tabindex="-1"
+        autocomplete="off"
+        aria-hidden="true"
+      />
 
-          <label>
-            Name
-            <input type="text" name="name" placeholder="Your name" required />
-          </label>
+      <label>
+        Name
+        <input type="text" name="name" placeholder="Your name" required />
+      </label>
 
-          <label>
-            Email
-            <input type="email" name="email" placeholder="Your email" required />
-          </label>
+      <label>
+        Email
+        <input type="email" name="email" placeholder="Your email" required />
+      </label>
 
-          <label>
-            Message
-            <textarea
-              name="message"
-              rows="4"
-              placeholder="How would you like to support or connect?"
-              required
-            ></textarea>
-          </label>
+      <label>
+        Message
+        <textarea
+          name="message"
+          rows="4"
+          placeholder="How would you like to support or connect?"
+          required
+        ></textarea>
+      </label>
 
-          <button class="btn btn-primary" type="submit">Send Message</button>
+      <button class="btn btn-primary" type="submit">Send Message</button>
 
-          <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
-        </form>
-      </div>
-    </section>
+      <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
   </main>
 
   <footer class="site-footer">
@@ -478,6 +483,160 @@
     It belongs only inside code.js.
     This version number forces browsers/GitHub Pages to load the newest code.js.
   -->
-  <script src="./code.js?v=10"></script>
+<script>
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxS9_JVD7UEk6ZP7jfBJcXWEPbYQtVL-sqmdjR6a8ptoS2fsa-1NliwYPoFgEULvu1t/exec";
+
+  window.handleKanyaContactSubmit = async function (event) {
+    event.preventDefault();
+
+    const contactForm = document.getElementById("contactForm");
+    const formStatus = document.getElementById("formStatus");
+
+    if (!contactForm || !formStatus) {
+      return false;
+    }
+
+    const submitButton = contactForm.querySelector('button[type="submit"]');
+
+    const name = contactForm.querySelector('[name="name"]').value.trim();
+    const email = contactForm.querySelector('[name="email"]').value.trim();
+    const message = contactForm.querySelector('[name="message"]').value.trim();
+    const website = contactForm.querySelector('[name="website"]').value.trim();
+
+    if (website) {
+      return false;
+    }
+
+    if (!name || !email || !message) {
+      showKanyaFormStatus("Please fill in all required fields.", "error");
+      return false;
+    }
+
+    if (!isValidKanyaEmail(email)) {
+      showKanyaFormStatus("Please enter a valid email address.", "error");
+      return false;
+    }
+
+    try {
+      submitButton.disabled = true;
+      submitButton.textContent = "Sending...";
+      showKanyaFormStatus("Sending your message...", "info");
+
+      const visitorInfo = await getKanyaVisitorInfo();
+
+      const payload = {
+        name: name,
+        email: email,
+        message: message,
+        source: "Kanya Mahima website contact form",
+        pageUrl: window.location.href,
+        browser: visitorInfo.browser,
+        deviceType: visitorInfo.deviceType,
+        screenSize: visitorInfo.screenSize,
+        language: visitorInfo.language,
+        timezone: visitorInfo.timezone,
+        ipAddress: visitorInfo.ipAddress
+      };
+
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      contactForm.reset();
+      showKanyaFormStatus("Thank you. Your message has been submitted.", "success");
+
+    } catch (error) {
+      console.error("Kanya Mahima contact form error:", error);
+      showKanyaFormStatus("Something went wrong. Please try again.", "error");
+
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = "Send Message";
+    }
+
+    return false;
+  };
+
+  function showKanyaFormStatus(message, type) {
+    const formStatus = document.getElementById("formStatus");
+
+    if (!formStatus) {
+      return;
+    }
+
+    formStatus.textContent = message;
+    formStatus.className = "form-status " + type;
+  }
+
+  async function getKanyaVisitorInfo() {
+    const userAgent = navigator.userAgent || "";
+
+    let ipAddress = "Unavailable";
+
+    try {
+      const ipResponse = await fetch("https://api.ipify.org?format=json");
+      const ipData = await ipResponse.json();
+
+      if (ipData && ipData.ip) {
+        ipAddress = ipData.ip;
+      }
+    } catch (error) {
+      console.warn("IP lookup failed:", error);
+    }
+
+    return {
+      browser: detectKanyaBrowser(userAgent),
+      deviceType: detectKanyaDeviceType(userAgent),
+      screenSize: window.screen.width + "x" + window.screen.height,
+      language: navigator.language || "Unavailable",
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Unavailable",
+      ipAddress: ipAddress
+    };
+  }
+
+  function detectKanyaBrowser(userAgent) {
+    if (userAgent.includes("Edg/")) {
+      return "Microsoft Edge";
+    }
+
+    if (userAgent.includes("Chrome/") && !userAgent.includes("Edg/")) {
+      return "Google Chrome";
+    }
+
+    if (userAgent.includes("Safari/") && !userAgent.includes("Chrome/")) {
+      return "Safari";
+    }
+
+    if (userAgent.includes("Firefox/")) {
+      return "Firefox";
+    }
+
+    if (userAgent.includes("OPR/") || userAgent.includes("Opera/")) {
+      return "Opera";
+    }
+
+    return "Unknown Browser";
+  }
+
+  function detectKanyaDeviceType(userAgent) {
+    const mobilePattern = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+
+    if (mobilePattern.test(userAgent)) {
+      return "Mobile or Tablet";
+    }
+
+    return "Desktop";
+  }
+
+  function isValidKanyaEmail(email) {
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return pattern.test(email);
+  }
+</script>
 </body>
 </html>
