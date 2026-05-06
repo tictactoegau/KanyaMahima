@@ -1,77 +1,167 @@
-// Kanya Mahima Contact Form Backend
-// Paste this file into Google Apps Script as Code.gs.
+/************************************************************
+ * Kanya Mahima Website JavaScript
+ * ----------------------------------------------------------
+ * Contact form → Google Apps Script → Email + Google Sheet
+ ************************************************************/
 
-const RECIPIENT_EMAIL = 'tictactoe@gmail.com'; // Change this to the email that should receive messages.
-const SHEET_NAME = 'Kanya Mahima Contact Messages';
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyiTJHnCDmRbJdsnh2EvCaxznPvtGDLqKokIporUIbjgDF2wGAIfrBYBvM1wrr931d/exec";
 
-function doPost(e) {
-  try {
-    const params = e && e.parameter ? e.parameter : {};
+document.addEventListener("DOMContentLoaded", function () {
+  initContactForm();
+});
 
-    // Honeypot spam check. Real users never fill this hidden field.
-    if (params.website) {
-      return jsonResponse({ ok: true, ignored: true });
-    }
 
-    const name = clean(params.name);
-    const email = clean(params.email);
-    const message = clean(params.message);
-    const source = clean(params.source || 'Kanya Mahima Website');
+function initContactForm() {
+  const form = document.querySelector("#contactForm");
+
+  if (!form) {
+    return;
+  }
+
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const submitButton = form.querySelector("button[type='submit']");
+    const statusMessage = document.querySelector("#formStatus");
+
+    const name = form.querySelector("[name='name']")?.value.trim() || "";
+    const email = form.querySelector("[name='email']")?.value.trim() || "";
+    const message = form.querySelector("[name='message']")?.value.trim() || "";
 
     if (!name || !email || !message) {
-      return jsonResponse({ ok: false, error: 'Missing required fields.' });
+      showStatus(statusMessage, "Please fill in all required fields.", "error");
+      return;
     }
 
-    const sheet = getOrCreateSheet_();
-    sheet.appendRow([
-      new Date(),
-      name,
-      email,
-      message,
-      source,
-      JSON.stringify(params)
-    ]);
+    try {
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Sending...";
+      }
 
-    MailApp.sendEmail({
-      to: RECIPIENT_EMAIL,
-      replyTo: email,
-      subject: 'New Kanya Mahima website message from ' + name,
-      body:
-        'New message from the Kanya Mahima website:\n\n' +
-        'Name: ' + name + '\n' +
-        'Email: ' + email + '\n' +
-        'Source: ' + source + '\n\n' +
-        'Message:\n' + message
-    });
+      showStatus(statusMessage, "Sending your message...", "info");
 
-    return jsonResponse({ ok: true });
+      const visitorInfo = await getVisitorInfo();
+
+      const payload = {
+        name: name,
+        email: email,
+        message: message,
+        source: "Kanya Mahima website contact form",
+
+        pageUrl: window.location.href,
+        browser: visitorInfo.browser,
+        deviceType: visitorInfo.deviceType,
+        screenSize: visitorInfo.screenSize,
+        language: visitorInfo.language,
+        timezone: visitorInfo.timezone,
+        ipAddress: visitorInfo.ipAddress
+      };
+
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      form.reset();
+
+      showStatus(
+        statusMessage,
+        "Thank you. Your message has been submitted.",
+        "success"
+      );
+
+    } catch (error) {
+      console.error("Kanya Mahima contact form error:", error);
+
+      showStatus(
+        statusMessage,
+        "Something went wrong. Please try again.",
+        "error"
+      );
+
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = "Send Message";
+      }
+    }
+  });
+}
+
+
+async function getVisitorInfo() {
+  const userAgent = navigator.userAgent || "";
+
+  let ipAddress = "Unavailable";
+
+  try {
+    const ipResponse = await fetch("https://api.ipify.org?format=json");
+    const ipData = await ipResponse.json();
+
+    if (ipData && ipData.ip) {
+      ipAddress = ipData.ip;
+    }
   } catch (error) {
-    return jsonResponse({ ok: false, error: String(error) });
+    console.warn("IP lookup failed:", error);
   }
+
+  return {
+    browser: detectBrowser(userAgent),
+    deviceType: detectDeviceType(userAgent),
+    screenSize: window.screen.width + "x" + window.screen.height,
+    language: navigator.language || "Unavailable",
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Unavailable",
+    ipAddress: ipAddress
+  };
 }
 
-function doGet() {
-  return ContentService
-    .createTextOutput('Kanya Mahima contact form endpoint is live.')
-    .setMimeType(ContentService.MimeType.TEXT);
-}
 
-function getOrCreateSheet_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet) {
-    sheet = ss.insertSheet(SHEET_NAME);
-    sheet.appendRow(['Timestamp', 'Name', 'Email', 'Message', 'Source', 'Raw Params']);
+function detectBrowser(userAgent) {
+  if (userAgent.includes("Edg/")) {
+    return "Microsoft Edge";
   }
-  return sheet;
+
+  if (userAgent.includes("Chrome/") && !userAgent.includes("Edg/")) {
+    return "Google Chrome";
+  }
+
+  if (userAgent.includes("Safari/") && !userAgent.includes("Chrome/")) {
+    return "Safari";
+  }
+
+  if (userAgent.includes("Firefox/")) {
+    return "Firefox";
+  }
+
+  if (userAgent.includes("OPR/") || userAgent.includes("Opera/")) {
+    return "Opera";
+  }
+
+  return "Unknown Browser";
 }
 
-function clean(value) {
-  return String(value || '').trim().slice(0, 5000);
+
+function detectDeviceType(userAgent) {
+  const mobilePattern = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+
+  if (mobilePattern.test(userAgent)) {
+    return "Mobile or Tablet";
+  }
+
+  return "Desktop";
 }
 
-function jsonResponse(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
+
+function showStatus(element, message, type) {
+  if (!element) {
+    return;
+  }
+
+  element.textContent = message;
+  element.className = "form-status " + type;
 }
