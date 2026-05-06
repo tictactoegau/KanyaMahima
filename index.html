@@ -63,9 +63,7 @@
             Education <b>•</b> Empowerment <b>•</b> Dignity <b>•</b> Devotion
           </p>
 
-          <p class="sacred-line">
-            Honoring every kanya as an embodiment of Shakti.
-          </p>
+          <p class="sacred-line">Honoring every kanya as an embodiment of Shakti.</p>
 
           <p class="hero-lead">
             Kanya Mahima is a devotional and educational initiative dedicated to honoring young girls through quality learning, empowerment, dignity, holistic development, and cultural reverence.
@@ -380,12 +378,13 @@
           <h2>Connect with Kanya Mahima</h2>
           <p>
             Send us a message to learn more, volunteer, partner, or support the program.
-            Your message will be sent securely through our contact backend.
+            Your message will be sent through our contact backend.
           </p>
         </div>
 
-        <form class="contact-form card-panel" id="contactForm">
+        <form class="contact-form card-panel" id="contactForm" novalidate>
           <input type="hidden" name="source" value="Kanya Mahima Website" />
+
           <input
             type="text"
             name="website"
@@ -475,11 +474,10 @@
   </footer>
 
   <!--
-    IMPORTANT:
-    Do not place the Google Apps Script URL in this HTML file.
-    The Web App URL belongs only in code.js.
-    The version number below forces browsers/GitHub Pages to load the updated JS file.
+    The Google Apps Script URL should NOT be inside index.html.
+    It belongs only inside code.js.
+    This version number forces browsers/GitHub Pages to load the newest code.js.
   -->
-  <script src="code.js?v=7"></script>
+  <script src="./code.js?v=10"></script>
 </body>
 </html>
