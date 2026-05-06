@@ -4,7 +4,7 @@
  * Contact form → Google Apps Script → Email + Google Sheet
  ************************************************************/
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyiTJHnCDmRbJdsnh2EvCaxznPvtGDLqKokIporUIbjgDF2wGAIfrBYBvM1wrr931d/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxS9_JVD7UEk6ZP7jfBJcXWEPbYQtVL-sqmdjR6a8ptoS2fsa-1NliwYPoFgEULvu1t/exec";
 
 document.addEventListener("DOMContentLoaded", function () {
   initContactForm();
